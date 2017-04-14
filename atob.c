@@ -4,7 +4,7 @@
 #include <string.h>
 #include <limits.h>
 
-void read_write( FILE*, FILE* );
+void atob( FILE*, FILE* );
 
 int main( int argc, char * argv[] ){
 
@@ -23,7 +23,7 @@ int main( int argc, char * argv[] ){
         }
 
         begin_time = clock();
-        read_write(ifp, ofp);
+        atob(ifp, ofp);
         end_time = clock();
         time_used = (double)(end_time - begin_time)/CLOCKS_PER_SEC;
         fprintf(stderr, "Time usage = %17.13f\n", time_used);
@@ -34,7 +34,7 @@ int main( int argc, char * argv[] ){
 	return 0;
 }
 
-void read_write( FILE * inputFile, FILE * outputFile ){
+void atob( FILE * inputFile, FILE * outputFile ){
 	
 	char ch;
 
