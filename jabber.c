@@ -41,11 +41,6 @@ void insert(node * head, int index){
 	
 }
 
-/* 
-you need a table to hold the pattern, index, and bit-length, should I use
-a 3 dimensional array / what else is there?
-*/
-
 // jabber reads in bits from file then puts it into the binary tree/table
 void jabber( FILE * inputfile, FILE * outputFile ){
 	
