@@ -3,57 +3,83 @@
 #include <time.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 
-/*
-This struct is used to store the various indexes of the binary
-*/
-struct b_tree {
+int bit_len = 0; // keep track of the bit-length
+int index_count = 0; // keep track of overall index
 
-	int index;
+// creating my own power function because the STL uses double's
+int Pow(int x, int n){
 	
+	int number = 1;
+	
+	for(int i = 0; i < n; ++i){
+		number *= x;
+	}
+	return number;
+}
+
+// This struct is used to store the various indexes of the binary
+struct b_tree {
+	
+	int index;
 	struct b_tree * right, * left;
 };
 
-typedef struct b_tree node; // create node
-
+typedef struct b_tree node; // use this to create other node objects
 
 // insert puts a new node into the tree, if no tree one will be created
-// head is the top of the tree, index is the next index to be added
-void insert(node * head, int index){
-	node * temp = NULL;
+void insert(node * head, int bit){
 
-	// if tree is empty
-	if(head == NULL){
-	// initialize first row to pattern 0, index 0, bit 0,
-	// then head will never be NULL
-		temp = (node *)malloc(sizeof(node));
-		temp->left = temp->right = NULL;
-		temp->index = index;
-		head = temp;
+	// increment bit_length as 2^bit_length 
+        if(index_count > Pow(2, bit_len)){
+                ++bit_len;
+        }
+
+	// bit_len of 0 obviously means it's the first bit (no pattern)
+	if(bit_len == 0){
+		node * temp_node = NULL;
+		temp_node = (node *)malloc(sizeof(node));
+		temp_node->left = temp_node->right = NULL;
+		temp_node->index = index_count;
+		++index_count; // always increment index
+		head = temp_node;
+		printf("Pattern at index %d: 0\n", head->index); 
 	}
-	else{ //if tree is not empty 
-
-	/*
-	you must go down the tree, left for 0 bit, right for 1 bit
-	*/
-	
-	{
-	
+	// have a while loop here that terminates at largest known pattern
+	else if(bit == 1){ 
+		if(head->right != NULL){ 	
+			head = head->right;
+			head->index = index_count;
+			++index_count;
+		} else if(head->right == NULL){
+			node * new_node = head->right;
+			new_node->index = index_count;
+			++index_count;
+		}
+	} else if(bit == 0){
+		if(head->left != NULL){ 
+			head = head->left;
+			head->index = index_count;
+			++index_count;
+		} else if(head->left == NULL){
+			node * new_node = head->left;
+			new_node->index = index_count;
+			++index_count;
+		}
+	}
 }
 
-// jabber reads in bits from file then puts it into the binary tree/table
-void jabber( FILE * inputfile, FILE * outputFile ){
-	
-	char ch = NULL;
-	while ( (ch = fgetc(inputFile)) != EOF){
-		// do you test what pattern you have an read in that way
-		// or read in first ch then see if it matches a pattern?
+// should we make a print function? or print as we add ^^?
 
-		/* 
-		once pattern is read you add the pattern and bit into 
-		next pattern, increment index, increment bit-length by
-		powers of two
-		*/
+// jabber reads in bits from file then puts it into the binary tree/table
+void jabber( FILE * inputFile, FILE * outputFile ){
+	
+	node * top_node;
+	int bit = 0;
+	
+	while( (bit = fgetc(inputFile)) != EOF){
+		insert(top_node, bit);
 	}
 }
 
@@ -85,20 +111,4 @@ int main( int argc, char * argv[] ){
 
         return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
