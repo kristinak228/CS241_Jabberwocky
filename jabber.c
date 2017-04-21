@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+
 int bit_len = 0; // keep track of the bit-length
 int index_count = 0; // keep track of overall index
 int bit_counter = 0; // debug method to make sure I'm getting throught the entire file, 
