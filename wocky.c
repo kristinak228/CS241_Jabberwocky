@@ -7,6 +7,9 @@
 #include <stdbool.h>
 
 /* W O C K Y */
+void wocky(FILE * inputFile, FILE * outputFile){
+	
+}
 
 int main( int argc, char * argv[] ){
 
@@ -25,7 +28,7 @@ int main( int argc, char * argv[] ){
 	}
 
 	begin_time = clock();
-	jabber(ifp, ofp);
+	wocky(ifp, ofp);
 	end_time = clock();
 	time_used = (double)(end_time - begin_time)/CLOCKS_PER_SEC;
 	fprintf(stderr, "Time usage = %17.13f\n", time_used);
