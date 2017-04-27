@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+
 int bit_len = 0; // keep track of the bit-length                                          
 int index_count = 0; // keep track of overall index                                       
 int bit_counter = 0; // debug method to make sure I'm getting throught the entire file,   
@@ -147,10 +148,12 @@ void jabber(FILE * inputFile, FILE * outputFile){
   printf("temp_node indedx = %i\n", temp_node->index);
   printf("bit_len  = %i\n", bit_len);
   printToBinary(temp_node->index, bit_len, outputFile);
+
 }
 
 
 int main( int argc, char * argv[] ){
+
 
   FILE *ifp, *ofp;
   clock_t begin_time, end_time;
@@ -177,3 +180,4 @@ int main( int argc, char * argv[] ){
 
   return 0;
 }
+
