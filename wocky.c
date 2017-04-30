@@ -6,12 +6,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-
-#include <stdio.h>
-#include <stdlib.h>
-
-
-
 int bit_counter = 0;
 int index_count = 0;
 int bit_len = 0;
