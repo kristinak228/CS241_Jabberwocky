@@ -6,6 +6,12 @@
 #include <math.h>
 #include <stdbool.h>
 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+
 int bit_counter = 0;
 int index_count = 0;
 int bit_len = 0;
@@ -48,6 +54,17 @@ void Insert_Entry( int index, char *pattern){
 
 }
 
+int Pow(int base, int exp){
+
+  int number = 1;
+
+  for(int i = 0; i < exp; ++i){
+    number *= base;
+  }
+  return number;
+}
+
+
 void Print_Table(){
   Table_Entry *temp = head;
   printf("Top of Table: \n");
@@ -60,22 +77,68 @@ void Print_Table(){
   printf("\n");
 }
 
+int binaryToDecimal(char *str){ 
+  //char *binstring = "10000001"; //binary for 129
+  int decimal = 0;
+  int stringpos;
 
-char * append(char * string1, char * string2)
+  for (stringpos=strlen(str)-1; stringpos>=0; stringpos--) {
+    decimal = decimal<<1;    
+    if (str[stringpos]=='1'){
+      decimal += 1;
+    }
+  }
+
+  //printf("The binary string %s is equal to %u in decimal.\n", str, decimal);
+  return decimal;
+}
+
+
+int search(int x)
 {
-  char * result = NULL;
-  asprintf(&result, "%s%s", string1, string2);
+  Table_Entry* current = head;  // Initialize current
+  while (current != NULL)
+    {
+      if (current->index == x){
+	return x;
+      }
+      current = current->next;
+    }
+  return 0;
+}
+
+
+char* concat(const char *s1, const char *s2)
+{
+  char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+  strcpy(result, s1);
+  strcat(result, s2);
   return result;
 }
 
+
+int fpeek(FILE *stream){
+  int c;
+
+  c = fgetc(stream);
+  ungetc(c, stream);
+
+  return c;
+}
+
+
+int printToBinary( char * a){
+  return 0;
+}
 //Print Encoding
+
 
 
 /* W O C K Y */
 void wocky(FILE * inputFile, FILE * outputFile){
-  char bit;
-  bit = fgetc(inputFile);
-  printf("bit1 %i: %c\n", bit_counter, bit);
+  char bit[2] = "\0";
+  bit[0] = fgetc(inputFile);
+  printf("bit1 %i: %c\n", bit_counter, bit[0]);
   ++bit_counter;
   //first case
   if(index_count == 0){
@@ -83,38 +146,60 @@ void wocky(FILE * inputFile, FILE * outputFile){
     ++index_count;
     head = temp_entry;
     
-    if(bit == '1'){
-      fprintf(outputFile, "First Case: %c\n", bit);
-      Table_Entry * new_entry = New_Entry(index_count, &bit/*append(bit, '\0')*/);
+    if(bit[0] == '1'){
+      fprintf(outputFile, "First Case: %c\n", bit[0]);
+      Table_Entry * new_entry = New_Entry(index_count, bit/*append(bit, '\0')*/);
       new_entry->previous = head;
       head->next = new_entry;
       ++index_count;
 
-    }else if(bit == '0'){
-      fprintf(outputFile, "First Case: %c\n", bit);
-      Table_Entry * new_entry = New_Entry(index_count, &bit/*append(bit, '\0')*/);
+    }else if(bit[0] == '0'){
+      fprintf(outputFile, "First Case: %c\n", bit[0]);
+      Table_Entry * new_entry = New_Entry(index_count, bit/*append(bit, '\0')*/);
       new_entry->previous = head;
       head->next = new_entry;
       ++index_count;
 
     }
-  }
-  
+  }  
+
   Print_Table();
 
   while(!feof(inputFile)){
-    bit = fgetc(inputFile);
-    if(bit == '\n' || bit == EOF) break;
-    printf("bit2 %i: %c\n", bit_counter, bit);
+    char bits[2] = "\0";
+    bits[0] = fgetc(inputFile);
+    if(bits[0] == '\n' || bits[0] == EOF) break;
+    printf("bit2 %i: %c\n", bit_counter, bits[0]);
     ++bit_counter;
     //Other Cases
-
+    if(index_count > Pow(2, bit_len)){
+      ++bit_len;
+    }
+    char *oldBits;
+    char *newBits = bits;
+    while(search(binaryToDecimal(newBits))){
+      oldBits = newBits;
+      if(fpeek(inputFile)){
+	char newBit[2] = "\0";
+	newBit[0] = fgetc(inputFile);
+	printf("bit2 %i: %c\n", bit_counter, newBit[0]);
+	++bit_counter;
+	newBits = concat(oldBits, newBit);
+      }else{
+	break;
+      }
+    }
+    //print pattern at binary to decimal of oldBits plus last character in newBits
+    //Make new node with new_bits
+    // increment index_count
   }
   //printf("bit_len  = %i\n", bit_len);
 
 }
 
-int main( int argc, char * argv[] ){
+
+
+int main( int argc, char * argv[] ) {
 
 	FILE *ifp, *ofp;
 	clock_t begin_time, end_time;
@@ -129,6 +214,9 @@ int main( int argc, char * argv[] ){
 	if(!(ofp = fopen(argv[2], "w"))){
 	  fprintf(stderr, "Cannot open file %s\n", argv[2]);
 	}
+	
+	//char *str = "111";
+	//printf( "%i\n", binaryToDecimal(str));
 
 	begin_time = clock();
 	wocky(ifp, ofp);
