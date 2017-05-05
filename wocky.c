@@ -7,11 +7,6 @@
 #include <stdbool.h>
 
 
-#include <stdio.h>
-#include <stdlib.h>
-
-
-
 int bit_counter = 0;
 int index_count = 0;
 int bit_len = 0;
@@ -93,20 +88,42 @@ int binaryToDecimal(char *str){
   return decimal;
 }
 
-
+//#define SRCH_PRE "\x1b[34m"
+//#define SRCH_FAIL "\x1b[31m"
+//#define SRCH_GOOD "\x1b[32m"
+//#define RST "\x1b[m"
 int search(int x)
 {
   Table_Entry* current = head;  // Initialize current
+  int iter = 0;
+  //printf(SRCH_PRE);
+  //printf("SEARCH(%d):\n", x);
   while (current != NULL)
     {
+      //printf("SEARCH: current %p, iter %d, current->index %d:", current, iter, current->index);
       if (current->index == x){
-	return x;
+	//printf(SRCH_GOOD "SUCCESS\n" RST);
+	return 1;
       }
+      //printf(SRCH_FAIL "FAILED\n" SRCH_PRE);
+      iter++;
+      current = current->next;
+    }
+  //printf("SEARCH END (current == %p), " SRCH_FAIL "FAILED\n" RST, current);
+  return 0;
+}
+
+char* returnPattern(int x){
+  Table_Entry* current = head;  // Initialize current
+  while (current != NULL){
+    if (current->index == x){
+      return current->pattern;
+    }
       current = current->next;
     }
   return 0;
 }
-
+  
 
 char* concat(const char *s1, const char *s2)
 {
@@ -117,13 +134,15 @@ char* concat(const char *s1, const char *s2)
 }
 
 
-int fpeek(FILE *stream){
+bool fpeek(FILE *stream){
   int c;
-
   c = fgetc(stream);
+  if((c != '\n') || (c != EOF)){
+    ungetc(c, stream);
+    return true;
+  }
   ungetc(c, stream);
-
-  return c;
+  return false;
 }
 
 
@@ -133,7 +152,7 @@ int printToBinary( char * a){
 //Print Encoding
 
 
-
+//#define OUT_PRE "\x1b[1;33m"
 /* W O C K Y */
 void wocky(FILE * inputFile, FILE * outputFile){
   char bit[2] = "\0";
@@ -142,19 +161,19 @@ void wocky(FILE * inputFile, FILE * outputFile){
   ++bit_counter;
   //first case
   if(index_count == 0){
-    Table_Entry *temp_entry = New_Entry(index_count, NULL);
+    Table_Entry *temp_entry = New_Entry(index_count, "");
     ++index_count;
     head = temp_entry;
     
     if(bit[0] == '1'){
-      fprintf(outputFile, "First Case: %c\n", bit[0]);
+      fprintf(outputFile, /*"First Case:*/ "%c", bit[0]);
       Table_Entry * new_entry = New_Entry(index_count, bit/*append(bit, '\0')*/);
       new_entry->previous = head;
       head->next = new_entry;
       ++index_count;
 
     }else if(bit[0] == '0'){
-      fprintf(outputFile, "First Case: %c\n", bit[0]);
+      fprintf(outputFile, /*"First Case:*/ "%c", bit[0]);
       Table_Entry * new_entry = New_Entry(index_count, bit/*append(bit, '\0')*/);
       new_entry->previous = head;
       head->next = new_entry;
@@ -163,8 +182,11 @@ void wocky(FILE * inputFile, FILE * outputFile){
     }
   }  
 
-  Print_Table();
+  //Print_Table();
 
+  int numBits = 0;
+  int searchResult;
+  int hitEnd;
   while(!feof(inputFile)){
     char bits[2] = "\0";
     bits[0] = fgetc(inputFile);
@@ -177,21 +199,39 @@ void wocky(FILE * inputFile, FILE * outputFile){
     }
     char *oldBits;
     char *newBits = bits;
-    while(search(binaryToDecimal(newBits))){
+    while(searchResult = search(binaryToDecimal(newBits)) && numBits <= bit_len ){
       oldBits = newBits;
       if(fpeek(inputFile)){
+	printf("\t\tWOCKY: if\n");
 	char newBit[2] = "\0";
 	newBit[0] = fgetc(inputFile);
-	printf("bit2 %i: %c\n", bit_counter, newBit[0]);
+	numBits ++;
+	if(newBit[0] == '\n' || newBit[0] == EOF) {
+	  hitEnd = 1;
+	  break;
+	}
+	printf("\t\tWOCKY: bit3 %i: %c\n", bit_counter, newBit[0]);
 	++bit_counter;
-	newBits = concat(oldBits, newBit);
+	newBits = concat(newBit, oldBits);
       }else{
+	printf("\t\tWOCKY: else\n");
 	break;
       }
     }
+    if(!searchResult) {
+      printf("\tWOCKY: endwhile(search failed)\n");
+    }
     //print pattern at binary to decimal of oldBits plus last character in newBits
+    fprintf( outputFile, /*"Pattern:*/ "%s", returnPattern(binaryToDecimal(oldBits)));
+    //printf(OUT_PRE "PATTERN (at %d): %s\n" RST, binaryToDecimal(oldBits), returnPattern(binaryToDecimal(oldBits)));
+    if(!hitEnd) {
+      fprintf( outputFile, /*"Bit: */ "%c", newBits[strlen(newBits)-1]);
+      //printf(OUT_PRE "BIT: %c\n" RST, newBits[strlen(newBits) - 1]);
+    }
     //Make new node with new_bits
+    Insert_Entry( index_count, newBits );
     // increment index_count
+    index_count++;
   }
   //printf("bit_len  = %i\n", bit_len);
 
@@ -220,6 +260,7 @@ int main( int argc, char * argv[] ) {
 
 	begin_time = clock();
 	wocky(ifp, ofp);
+	fprintf(ofp, "\n");
 	end_time = clock();
 	time_used = (double)(end_time - begin_time)/CLOCKS_PER_SEC;
 	fprintf(stderr, "Time usage = %17.13f\n", time_used);

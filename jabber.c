@@ -37,8 +37,8 @@ void printToBinary(int integer, int bitLen, FILE *outputFile){
   //fprintf(outputFile, "bit_len = %i\n", bitLen);
   bitLen--;
   while(bitLen >=  0){
-    fprintf(outputFile, "Index to Binary: ");
-    fprintf(outputFile, "%d\n", (integer>>bitLen)&1);
+    //fprintf(outputFile, "Index to Binary: ");
+    fprintf(outputFile, "%d", (integer>>bitLen)&1);
     --bitLen;
   }
   return;
@@ -61,7 +61,7 @@ void jabber(FILE * inputFile, FILE * outputFile){
     head = temp_node;
     
     if(bit == '1'){
-      fprintf(outputFile, "First Case: %c\n", bit);
+      fprintf(outputFile, /*"First Case: */"%c", bit);
       node * new_node = NULL;
       new_node = (node *)malloc(sizeof(node));
       new_node->left = new_node->right = NULL;
@@ -69,7 +69,7 @@ void jabber(FILE * inputFile, FILE * outputFile){
       ++index_count;
       head->right= new_node;
     }else if(bit == '0'){
-      fprintf(outputFile, "First Case: %c\n", bit);
+      fprintf(outputFile, /*"First Case:*/ "%c", bit);
       node * new_node = NULL;
       new_node = (node *)malloc(sizeof(node));
       new_node->left = new_node->right = NULL;
@@ -112,7 +112,7 @@ void jabber(FILE * inputFile, FILE * outputFile){
 	  
 	}else if(!(temp_node->right)){
 	  printToBinary(temp_node->index, bit_len, outputFile);
-	  fprintf(outputFile, "bit = 1: %c\n", bit);
+	  fprintf(outputFile, /*"bit = 1:*/ "%c", bit);
 	  printf("temp_node indedx = %i\n", temp_node->index);
 	  node * new_node = NULL;
 	  new_node = (node *)malloc(sizeof(node));
@@ -132,7 +132,7 @@ void jabber(FILE * inputFile, FILE * outputFile){
 
 	}else if(!(temp_node->left)){
 	  printToBinary(temp_node->index, bit_len, outputFile);
-	  fprintf(outputFile, "bit = 0: %c\n", bit);
+	  fprintf(outputFile, /*"bit = 0:*/ "%c", bit);
 	  printf("temp_node indedx = %i\n", temp_node->index);
 	  node * new_node = NULL;
 	  new_node = (node *)malloc(sizeof(node));
@@ -171,6 +171,7 @@ int main( int argc, char * argv[] ){
 
   begin_time = clock();
   jabber(ifp, ofp);
+  fprintf(ofp, "\n");
   end_time = clock();
   time_used = (double)(end_time - begin_time)/CLOCKS_PER_SEC;
   fprintf(stderr, "Time usage = %17.13f\n", time_used);
